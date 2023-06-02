@@ -7,7 +7,7 @@
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Practica SRE Paolo Scotto Di Mase
-Se han agregado 2 endpoints, 3 contadores y 2 pruebas unitarias que están señalizados de manera visible en el codigo.
+han agregado 2 endpoints, 3 contadores y 2 pruebas unitarias que están señalizados de manera visible en el codigo.
 Observamos la ejecución de los 4 tests con el informe de cobertura de código:
 
     (venv) 21:33 @/Users/paoloscotto/desktop/sre ~ (git)-[main] $ pytest --cov
