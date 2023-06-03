@@ -6,5 +6,5 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# test-app-argocd-src
+# k-app-argocd-src
 App source code that uses GitHub Actions for CI and ArgoCD for CD
