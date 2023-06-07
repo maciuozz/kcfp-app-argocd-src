@@ -7,7 +7,7 @@ import pytest
 import httpx
 from fastapi.testclient import TestClient
 from mongomock_motor import AsyncMongoMockClient
-from application.app import StudentsServer, StudentModel, app
+from application.app import StudentsServer, StudentModel, app, root_endpoint_message
 from config import test_config as config
 
 
@@ -59,7 +59,7 @@ class TestFastAPIApp:
         result_data = json.loads(result.body.decode())
 
         assert result.status_code == 200
-        assert result_data == {"msg": "Hello World"}
+        assert result_data == root_endpoint_message
 
 #In this method the database handler is mocked using AsyncMongoMockClient(). This allows the test to run
 #without actually interacting with a real MongoDB database. Instead, the test uses a mock implementation

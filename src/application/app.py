@@ -107,6 +107,8 @@ class UpdateStudentModel(BaseModel):
 #The FastAPI() function is called to create a new instance of the FastAPI application.
 app = FastAPI()
 
+root_endpoint_message = {"message": "Hello world will be updated automatically in private repository"}
+
 #The StudentsServer is the main class that configures the FastAPI server and defines endpoint routes.
 class StudentsServer:
     """
@@ -181,7 +183,7 @@ class StudentsServer:
         REQUESTS.inc()
         #Increase the counter used to record the requests made to the main endpoint
         MAIN_ENDPOINT_REQUESTS.inc()
-        return JSONResponse(status_code=status.HTTP_200_OK, content={"msg": "Hello World"})
+        return JSONResponse(status_code=status.HTTP_200_OK, content=root_endpoint_message)
 
     async def health_check(self):
         """Simple health check."""
