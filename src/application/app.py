@@ -107,7 +107,7 @@ class UpdateStudentModel(BaseModel):
 #The FastAPI() function is called to create a new instance of the FastAPI application.
 app = FastAPI()
 
-root_endpoint_message = {"message": "Hello world will be updated automatically in private repository 1"}
+root_endpoint_message = {"message": "Hello world will be updated automatically in private repository 10"}
 
 #The StudentsServer is the main class that configures the FastAPI server and defines endpoint routes.
 class StudentsServer:
