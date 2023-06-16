@@ -16,6 +16,7 @@ from prometheus_client import Counter
 
 #The endpoint counters are used to collect metrics on the total number of requests received by each of these endpoints.
 REQUESTS = Counter('server_requests_total', 'Total number of requests to this webserver')
+HEALTHCHECK_REQUESTS = Counter('healthcheck_requests_total', 'Total number of requests to healthcheck')
 FREQUENCY_ANALYZER_REQUESTS = Counter('frequencies_requests_total', 'Total number of requests to frequencY_analyzer')
 MAIN_ENDPOINT_REQUESTS = Counter('main_requests_total', 'Total number of requests to main endpoint')
 STUDENT_CREATE_REQUESTS = Counter('students_create_total', 'Total number of requests to the endpoint to create a student')
@@ -154,6 +155,18 @@ class StudentsServer:
         """Maps the endpoint routes with their methods."""
 
         app.add_api_route(
+            path="/health",
+            endpoint=self.health_check,
+            methods=["GET"]
+        )
+
+        app.add_api_route(
+            path="/",
+            endpoint=self.read_main,
+            methods=["GET"]
+        )
+
+        app.add_api_route(
             path="/analyze-text-file",
             endpoint=self.analyze_text_file,
             methods=["POST"]
@@ -168,13 +181,18 @@ class StudentsServer:
             response_description="Create a new student",
         )
 
-        app.add_api_route(
-            path="/",
-            endpoint=self.read_main,
-            methods=["GET"]
-        )
-
 #Definition of endpoints.
+
+    async def health_check(self):
+        """Simple health check."""
+        self._logger.info("Healthcheck endpoint called")
+
+        # Increment counter used for register the total number of calls in the webserver
+        REQUESTS.inc()
+        # Increment counter used for register the requests to healtcheck endpoint
+        HEALTHCHECK_REQUESTS.inc()
+        return JSONResponse(status_code=status.HTTP_200_OK, content={"health": "ok"})
+
     async def read_main(self):
         """Simple main endpoint"""
         self._logger.info("Main endpoint called")

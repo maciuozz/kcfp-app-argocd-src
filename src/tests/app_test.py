@@ -38,6 +38,30 @@ class TestFastAPIApp:
     )
 
     @pytest.mark.asyncio
+    async def read_health_test(self):
+        """Tests the health check endpoint"""
+        db_handler = AsyncMongoMockClient()[config.MONGODB_DB]
+        students_server = StudentsServer(config, db_handler)
+
+        result = await students_server.health_check()
+        result_data = json.loads(result.body.decode())
+
+        assert result.status_code == 200
+        assert result_data == {"health": "ok"}
+
+    @pytest.mark.asyncio
+    async def read_main_test(self):
+        """Tests the root endpoint"""
+        db_handler = AsyncMongoMockClient()[config.MONGODB_DB]
+        students_server = StudentsServer(config, db_handler)
+
+        result = await students_server.read_main()
+        result_data = json.loads(result.body.decode())
+
+        assert result.status_code == 200
+        assert result_data == root_endpoint_message
+
+    @pytest.mark.asyncio
     async def analyze_text_file_test(self):
         """Tests the frequency analyzer endpoint"""
 
@@ -77,18 +101,6 @@ class TestFastAPIApp:
         # Perform assertions to verify the response
         assert result.status_code == 200
         assert result_data == expected_output
-
-    @pytest.mark.asyncio
-    async def read_main_test(self):
-        """Tests the root endpoint"""
-        db_handler = AsyncMongoMockClient()[config.MONGODB_DB]
-        students_server = StudentsServer(config, db_handler)
-
-        result = await students_server.read_main()
-        result_data = json.loads(result.body.decode())
-
-        assert result.status_code == 200
-        assert result_data == root_endpoint_message
 
 #In this method the database handler is mocked using AsyncMongoMockClient(). This allows the test to run
 #without actually interacting with a real MongoDB database. Instead, the test uses a mock implementation
