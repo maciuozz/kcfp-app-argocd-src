@@ -24,3 +24,4 @@ uvicorn==0.15.0
 mongomock==3.23.0
 mongomock-motor==0.0.5
 prometheus-client==0.14.0
+pymongo==4.0.1

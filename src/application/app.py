@@ -5,6 +5,7 @@ from typing import Optional
 import logging
 import re
 import requests
+from pymongo import ReturnDocument
 from fastapi import FastAPI, Body, status, UploadFile, File
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -181,6 +182,12 @@ class StudentsServer:
             response_description="Create a new student",
         )
 
+        app.add_api_route(
+            "/students/{student_id}/{field}/{value}",
+            endpoint=self.update_student,
+            methods=["PUT"]
+        )
+
 #Definition of endpoints.
 
     async def health_check(self):
@@ -293,3 +300,15 @@ class StudentsServer:
 
         joke = response.json()
         return {"setup": joke["setup"], "punchline": joke["punchline"]}
+
+    async def update_student(self, student_id: str, field: str, value: str):
+        """Update a student's field based on their ID"""
+        updated_student = await self._db_handler[self._config.MONGODB_COLLECTION].find_one_and_update(
+            {"_id": ObjectId(student_id)},
+            {"$set": {field: value}},
+            return_document=ReturnDocument.AFTER
+        )
+        if updated_student:
+            return JSONResponse(status_code=status.HTTP_200_OK, content=updated_student)
+
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": "Student not found"})
