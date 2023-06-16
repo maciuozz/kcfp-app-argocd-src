@@ -280,10 +280,8 @@ class StudentsServer:
         student = jsonable_encoder(student)
         self._logger.debug('Trying to add student %s', student)
         new_student = await self._db_handler[self._config.MONGODB_COLLECTION].insert_one(student)
-        #created_student = await self._db_handler[self._config.MONGODB_COLLECTION].\
-            #find_one({"_id": new_student.inserted_id})
-        created_student = await self._db_handler[self._config.MONGODB_COLLECTION].find_one({"_id": student.id})
-
+        created_student = await self._db_handler[self._config.MONGODB_COLLECTION].\
+            find_one({"_id": new_student.inserted_id})
         self._logger.debug('Added student successfully with _id %s', new_student.inserted_id)
         return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_student)
 
