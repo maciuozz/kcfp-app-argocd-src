@@ -15,7 +15,7 @@ client = TestClient(app)
 
 class TestFastAPIApp:
     """
-    Class define tests for testing FastAPI application
+    Class that defines tests for the FastAPI application
     """
     _valid_student_id = "62422b3329661ce0eab2066f"
     _valid_student_name = "Jane Doe"
@@ -38,20 +38,49 @@ class TestFastAPIApp:
     )
 
     @pytest.mark.asyncio
-    async def read_health_test(self):
-        """Test the call to the root endpoint"""
+    async def analyze_text_file_test(self):
+        """Tests the frequency analyzer endpoint"""
+
         db_handler = AsyncMongoMockClient()[config.MONGODB_DB]
         students_server = StudentsServer(config, db_handler)
 
-        result = await students_server.health_check()
+        # Create a mock UploadFile object
+        class MockUploadFile:
+            """A mock implementation of an upload file object for testing purposes"""
+            def __init__(self, filename, content):
+                self.filename = filename
+                self.content = content
+
+            async def read(self):
+                """
+                This method encodes the content of the mock upload file using the default encoding
+                and returns it as bytes. It can be used to simulate reading the content of the file
+                asynchronously.
+                """
+                return self.content.encode()
+
+        # Define the test input and expected output
+        test_input = MockUploadFile("test.txt", "This is a test file.")
+        expected_output = {
+            "filename": "test.txt",
+            "total_words": 5,
+            "highest_frequency": 1,
+            "message": "All words have the same frequency of 1",
+        }
+
+        # Call the analyze_text_file endpoint
+        result = await students_server.analyze_text_file(test_input)
+
+        # Parse the response JSON
         result_data = json.loads(result.body.decode())
 
+        # Perform assertions to verify the response
         assert result.status_code == 200
-        assert result_data == {"health": "ok"}
+        assert result_data == expected_output
 
     @pytest.mark.asyncio
     async def read_main_test(self):
-        """Test the call to the root endpoint"""
+        """Tests the root endpoint"""
         db_handler = AsyncMongoMockClient()[config.MONGODB_DB]
         students_server = StudentsServer(config, db_handler)
 

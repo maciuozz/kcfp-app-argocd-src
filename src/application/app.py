@@ -1,10 +1,11 @@
 """
 This module  defines a FastAPI application with 4 endpoints
 """
-
 from typing import Optional
 import logging
-from fastapi import FastAPI, Body, status
+import re
+import requests
+from fastapi import FastAPI, Body, status, UploadFile, File
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from hypercorn.asyncio import serve
@@ -12,13 +13,12 @@ from hypercorn.config import Config as HyperCornConfig
 from pydantic import BaseModel, Field, EmailStr
 from bson import ObjectId
 from prometheus_client import Counter
-import requests
 
 #The endpoint counters are used to collect metrics on the total number of requests received by each of these endpoints.
 REQUESTS = Counter('server_requests_total', 'Total number of requests to this webserver')
-HEALTHCHECK_REQUESTS = Counter('healthcheck_requests_total', 'Total number of requests to healthcheck')
+FREQUENCY_ANALYZER_REQUESTS = Counter('frequencies_requests_total', 'Total number of requests to frequencY_analyzer')
 MAIN_ENDPOINT_REQUESTS = Counter('main_requests_total', 'Total number of requests to main endpoint')
-STUDENT_CREATE_REQUESTS = Counter('students_create_total', 'Total number of requests to the endpoint for create a student')
+STUDENT_CREATE_REQUESTS = Counter('students_create_total', 'Total number of requests to the endpoint to create a student')
 JOKE_ENDPOINT_REQUESTS = Counter('joke_requests_total', 'Total number of requests to joke endpoint')
 
 #The PyObjectId class is defined, which extends the ObjectId class from the bson module. It validates whether a given
@@ -154,9 +154,9 @@ class StudentsServer:
         """Maps the endpoint routes with their methods."""
 
         app.add_api_route(
-            path="/health",
-            endpoint=self.health_check,
-            methods=["GET"]
+            path="/analyze-text-file",
+            endpoint=self.analyze_text_file,
+            methods=["POST"]
         )
 
         app.add_api_route(
@@ -185,13 +185,60 @@ class StudentsServer:
         MAIN_ENDPOINT_REQUESTS.inc()
         return JSONResponse(status_code=status.HTTP_200_OK, content=root_endpoint_message)
 
-    async def health_check(self):
-        """Simple health check."""
-        self._logger.info("Healthcheck endpoint called")
+    async def analyze_text_file(self, file: UploadFile = File(...)):
+        """Frequencies analyzer"""
+        self._logger.info("Frequency analyzer endpoint called")
 
         REQUESTS.inc()
-        HEALTHCHECK_REQUESTS.inc()
-        return JSONResponse(status_code=status.HTTP_200_OK, content={"health": "ok"})
+        FREQUENCY_ANALYZER_REQUESTS.inc()
+
+        # Read the contents of the uploaded text file
+        file_content = await file.read()
+
+        # Check if the file is empty
+        if len(file_content) == 0:
+            return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"Error": "Empty file"})
+
+        # Convert file content to lowercase and split into words
+        words = re.findall(r"\b[A-Za-z]+\b", file_content.decode().lower())
+
+        # Check if there are no valid words in the file
+        if len(words) == 0:
+            return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"Error": "No valid words in file"})
+
+        # Count word frequencies
+        word_counts = {}
+        for word in words:
+            word_counts[word] = word_counts.get(word, 0) + 1
+
+        # Calculate total number of words
+        total_words = len(words)
+
+        # Determine the word(s) with the highest frequency
+        max_frequency = max(word_counts.values())
+        most_frequent_words = [word for word, count in word_counts.items() if count == max_frequency]
+
+        # Prepare the response JSON
+        analysis_result = {
+            "filename": file.filename,
+            "total_words": total_words,
+            "highest_frequency": max_frequency
+        }
+
+        # Check if all words have the same frequency
+        if len(set(word_counts.values())) == 1:
+            analysis_result["message"] = f"All words have the same frequency of {max_frequency}"
+        else:
+            analysis_result["most_frequent_words"] = most_frequent_words
+
+        # Check if there is only one word in the file
+        if len(words) == 1:
+            analysis_result["message"] = "Only one word found in the file"
+
+        # Return the analysis result as JSON response
+        return JSONResponse(status_code=status.HTTP_200_OK, content=analysis_result)
+
+
 
     async def create_student(self, student: StudentModel = Body(...)):
         """Add a new student
