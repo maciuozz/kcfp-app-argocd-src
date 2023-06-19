@@ -145,3 +145,25 @@ class TestFastAPIApp:
         assert isinstance(data["punchline"], str)
         assert len(data["setup"]) > 0
         assert len(data["punchline"]) > 0
+
+    @pytest.mark.asyncio
+    async def update_student_test(self):
+        """Tests the update_student endpoint"""
+
+        student_id = "64906ddd99fd643231c6213a"  # Example student ID
+        field_name = "course"  # Example field name to update
+        field_value = "Devops & Cloud Computing"  # Example new value for the field
+
+        # Mock the database handler
+        db_handler_mock = AsyncMongoMockClient()[config.MONGODB_DB]
+
+        # Create the students_server instance using the mocked db_handler
+        students_server = StudentsServer(config, db_handler_mock)
+
+        # Call the update_student method
+        result = await students_server.update_student(student_id, field_name, field_value)
+
+        # Verify the behavior
+        assert result.status_code == 200  # Assuming a successful update returns a 200 status code
+        updated_student = result.json()
+        assert updated_student[field_name] == field_value  # Assuming the updated field value matches the provided value

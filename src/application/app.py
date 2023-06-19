@@ -18,10 +18,12 @@ from prometheus_client import Counter
 #The endpoint counters are used to collect metrics on the total number of requests received by each of these endpoints.
 REQUESTS = Counter('server_requests_total', 'Total number of requests to this webserver')
 HEALTHCHECK_REQUESTS = Counter('healthcheck_requests_total', 'Total number of requests to healthcheck')
-FREQUENCY_ANALYZER_REQUESTS = Counter('frequencies_requests_total', 'Total number of requests to frequencY_analyzer')
+FREQUENCY_ANALYZER_REQUESTS = Counter('frequencies_requests_total', 'Total number of requests to frequency analyzer endpoint')
 MAIN_ENDPOINT_REQUESTS = Counter('main_requests_total', 'Total number of requests to main endpoint')
 STUDENT_CREATE_REQUESTS = Counter('students_create_total', 'Total number of requests to the endpoint to create a student')
-JOKE_ENDPOINT_REQUESTS = Counter('joke_requests_total', 'Total number of requests to joke endpoint')
+STUDENT_UPDATE_REQUESTS = Counter('students_update_total', 'Total number of requests to the endpoint to update a student')
+JOKE_ENDPOINT_REQUESTS = Counter('joke_requests_total', 'Total number of requests to the joke endpoint')
+GET_ALL_STUDENTS_REQUESTS = Counter('get_all_students_total', 'Total number of requests to the endpoint to get a list of students')
 
 #The PyObjectId class is defined, which extends the ObjectId class from the bson module. It validates whether a given
 #ID is a valid ObjectId and provides a string representation of the ID.
@@ -311,20 +313,11 @@ class StudentsServer:
         joke = response.json()
         return {"setup": joke["setup"], "punchline": joke["punchline"]}
 
-    #async def update_student(self, student_id: str, field: str, value: str):
-       # """Update a student's field based on their ID"""
-        #updated_student = await self._db_handler[self._config.MONGODB_COLLECTION].find_one_and_update(
-         #   {"_id": ObjectId(student_id)},
-          #  {"$set": {field: value}},
-        #return_document=ReturnDocument.AFTER
-        #)
-        #if updated_student:
-         #   return JSONResponse(status_code=status.HTTP_200_OK, content=updated_student)
-
-        #return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": "Student not found"})
-
     async def update_student(self, student_id: str, field_name: str, field_value: str):
         """Update a specific field for a student based on their ID"""
+        REQUESTS.inc()
+        STUDENT_UPDATE_REQUESTS.inc()
+
         updated_student = await self._db_handler[self._config.MONGODB_COLLECTION].find_one_and_update(
             {"_id": student_id},
             {"$set": {field_name: field_value}},
@@ -338,5 +331,8 @@ class StudentsServer:
 
     async def get_all_students(self):
         """Get a list of all students"""
+        REQUESTS.inc()
+        GET_ALL_STUDENTS_REQUESTS.inc()
+
         students = await self._db_handler[self._config.MONGODB_COLLECTION].find().to_list(length=None)
         return students
