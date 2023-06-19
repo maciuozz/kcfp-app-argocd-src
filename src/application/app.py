@@ -183,7 +183,7 @@ class StudentsServer:
         )
 
         app.add_api_route(
-            "/students/{student_id}",
+            "/students/{student_id}/{field_name}/{field_value}",
             endpoint=self.update_student,
             methods=["PUT"],
             response_model=StudentModel,
@@ -315,15 +315,11 @@ class StudentsServer:
 
         #return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": "Student not found"})
 
-    async def update_student(self, student_id: str, update_data: UpdateStudentModel):
-        """Update a student's field based on their ID"""
-        update_fields = update_data.dict(exclude_unset=True)
-        if not update_fields:
-            return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"message": "No fields to update"})
-
+    async def update_student(self, student_id: str, field_name: str, field_value: str):
+        """Update a specific field for a student based on their ID"""
         updated_student = await self._db_handler[self._config.MONGODB_COLLECTION].find_one_and_update(
             {"_id": student_id},
-            {"$set": update_fields},
+            {"$set": {field_name: field_value}},
             return_document=ReturnDocument.AFTER
         )
 
