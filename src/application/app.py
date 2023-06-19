@@ -322,7 +322,7 @@ class StudentsServer:
             return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"message": "No fields to update"})
 
         updated_student = await self._db_handler[self._config.MONGODB_COLLECTION].find_one_and_update(
-            {"_id": ObjectId(student_id)},
+            {"_id": student_id},
             {"$set": update_fields},
             return_document=ReturnDocument.AFTER
         )
