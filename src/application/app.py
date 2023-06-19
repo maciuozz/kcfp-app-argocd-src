@@ -55,8 +55,11 @@ class PyObjectId(ObjectId):
     def __modify_schema__(cls, field_schema):
         field_schema.update(type="string")
 
-#The StudentModel class is defined using Pydantic's BaseModel. It represents the attributes of a student and includes
-#validation rules. The Config class inside StudentModel is used to configure MongoDB access and serialization
+# The StudentModel class is defined using Pydantic's BaseModel. It represents the attributes of a student and includes
+# validation rules. It is responsible for providing default values and example values in the "Try it out" section of the
+# FastAPI interface. Inside the Config class of the StudentModel, we can find the schema_extra attribute. This attribute
+# provides additional schema information for the model, including examples for request bodies. The example values
+# specified in schema_extra will be displayed in the FastAPI interface as pre-filled values for the request body.
 class StudentModel(BaseModel):
     """
     StudentModel defines student attributes used for creation
