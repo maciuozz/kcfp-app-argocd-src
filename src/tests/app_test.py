@@ -150,20 +150,67 @@ class TestFastAPIApp:
     async def update_student_test(self):
         """Tests the update_student endpoint"""
 
-        student_id = "64906ddd99fd643231c6213a"  # Example student ID
+        # If we want to modify a student we need to create one first. The only one we are going to create is the
+        # one defined using _valid_student_data_mongo and it will be the only one we can modify. That is why when
+        # defining student_id we need to use the same id we used for the student in the TestFastAPIApp class above.
+        student_id = "62422b3329661ce0eab2066f"
         field_name = "course"  # Example field name to update
         field_value = "Devops & Cloud Computing"  # Example new value for the field
 
         # Mock the database handler
         db_handler_mock = AsyncMongoMockClient()[config.MONGODB_DB]
-
         # Create the students_server instance using the mocked db_handler
         students_server = StudentsServer(config, db_handler_mock)
 
-        # Call the update_student method
+        # The create_student method of the students_server instance is called with self._valid_student_data_mongo
+        # (defined above in the TestFastAPIApp class) as the argument. This creates a student record in the database
+        # that we need in order to make the modification.
+        await students_server.create_student(self._valid_student_data_mongo)
+
+        # Call the update_student method. This updates the specified field of the student record.
         result = await students_server.update_student(student_id, field_name, field_value)
 
-        # Verify the behavior
+        # Verify the behavior.
         assert result.status_code == 200  # Assuming a successful update returns a 200 status code
-        updated_student = result.json()
-        assert updated_student[field_name] == field_value  # Assuming the updated field value matches the provided value
+
+        # Retrieve the updated student from the database. This represents the collection in the database
+        # where the student records are stored.
+        collection = db_handler_mock[config.MONGODB_COLLECTION]
+        # The find_one method is called on the collection object with {"_id": student_id} as the filter. This
+        # retrieves the updated student record from the database.
+        updated_student = await collection.find_one({"_id": student_id})
+
+        # Verify that the field value is updated. It's checking course == Devops & Cloud Computing.
+        assert updated_student[field_name] == field_value
+
+    @pytest.mark.asyncio
+    async def get_all_students_test(self):
+        """Tests the get_all_students endpoint"""
+
+        # Set up dependencies
+        db_handler_mock = AsyncMongoMockClient()[config.MONGODB_DB]
+        students_server = StudentsServer(config, db_handler_mock)
+
+        # Insert the student into the collection
+        await students_server.create_student(self._valid_student_data_mongo)
+
+        # Call the get_all_students method
+        students=await students_server.get_all_students()
+
+        assert isinstance(students, list)  # Check if the returned value is a list
+        assert len(students) == 1  # Check if there is only one student in the returned list
+
+        # Convert dictionaries (each student is a dictionary) to StudentModel objects.
+        # In the line StudentModel(**student), **student is unpacking the student dictionary and passing its
+        # key-value pairs as keyword arguments to the StudentModel constructor.
+        # By using **student, we are essentially passing each key-value pair from the student dictionary as a separate
+        # keyword argument to the StudentModel constructor. This allows the constructor to initialize the attributes of
+        # the StudentModel object with the corresponding values from the dictionary.
+        student_models = [StudentModel(**student) for student in students]
+
+        # Verify the student fields
+        assert student_models[0].id == self._valid_student_data_mongo.id
+        assert student_models[0].name == self._valid_student_data_mongo.name
+        assert student_models[0].email == self._valid_student_data_mongo.email
+        assert student_models[0].course == self._valid_student_data_mongo.course
+        assert student_models[0].gpa == self._valid_student_data_mongo.gpa
