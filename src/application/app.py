@@ -1,7 +1,7 @@
 """
 This module  defines a FastAPI application with 4 endpoints
 """
-from typing import Optional, List
+from typing import Optional
 import logging
 import re
 import requests
@@ -185,15 +185,9 @@ class StudentsServer:
         app.add_api_route(
             "/students/{student_id}",
             endpoint=self.update_student,
-            methods=["PUT"]
-        )
-
-        app.add_api_route(
-            path="/api/students",
-            endpoint=self.get_all_students,
-            methods=["GET"],
-            response_model=List[StudentModel],
-            response_description="Get all students"
+            methods=["PUT"],
+            response_model=StudentModel,
+            response_description="Update a student's field"
         )
 
 #Definition of endpoints.
@@ -337,8 +331,3 @@ class StudentsServer:
             return JSONResponse(status_code=status.HTTP_200_OK, content=updated_student)
 
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content={"message": "Student not found"})
-
-    async def get_all_students(self):
-        """Retrieve all students"""
-        students = await self._db_handler[self._config.MONGODB_COLLECTION].find().to_list()
-        return students
