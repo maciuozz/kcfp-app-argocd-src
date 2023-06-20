@@ -289,6 +289,8 @@ class StudentsServer:
         -------
         Response from the action layer
         """
+        self._logger.info("Create student endpoint called")
+
         STUDENT_CREATE_REQUESTS.inc()
         REQUESTS.inc()
 
@@ -318,6 +320,8 @@ class StudentsServer:
 
     async def update_student(self, student_id: str, field_name: str, field_value: str):
         """Update a specific field for a student based on their ID"""
+        self._logger.info("Update student endpoint called")
+
         REQUESTS.inc()
         STUDENT_UPDATE_REQUESTS.inc()
 
@@ -334,6 +338,8 @@ class StudentsServer:
 
     async def get_all_students(self):
         """Get a list of all students"""
+        self._logger.info("List all students endpoint called")
+
         REQUESTS.inc()
         GET_ALL_STUDENTS_REQUESTS.inc()
 
