@@ -24,6 +24,7 @@ STUDENT_CREATE_REQUESTS = Counter('students_create_total', 'Total number of requ
 STUDENT_UPDATE_REQUESTS = Counter('students_update_total', 'Total number of requests to the endpoint to update a student')
 JOKE_ENDPOINT_REQUESTS = Counter('joke_requests_total', 'Total number of requests to the joke endpoint')
 GET_ALL_STUDENTS_REQUESTS = Counter('get_all_students_total', 'Total number of requests to the endpoint to get a list of students')
+APP_START_COUNT = Counter('app_start_count_total', 'Number of times the application has started')
 
 #The PyObjectId class is defined, which extends the ObjectId class from the bson module. It validates whether a given
 #ID is a valid ObjectId and provides a string representation of the ID.
@@ -154,6 +155,7 @@ class StudentsServer:
         self._hypercorn_config.bind = [f'0.0.0.0:{self._config.FASTAPI_CONFIG["port"]}']
         self._hypercorn_config.keep_alive_timeout = 90
         self.add_routes()
+        APP_START_COUNT.inc()
         await serve(app, self._hypercorn_config)
 
 #The add_routes method maps the endpoint routes to their respective methods using FastAPI's add_api_route function.
