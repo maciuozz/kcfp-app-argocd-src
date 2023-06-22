@@ -79,7 +79,7 @@
             "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "min(app_start_count_total{namespace=\"$namespace\"})",
+          "expr": "sum(app_start_count_total{namespace=\"$namespace\"})",
           "format": "time_series",
           "interval": "",
           "legendFormat": "",
@@ -260,14 +260,14 @@
             "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum(bye_requests_total{namespace=\"$namespace\"}) - sum(min_over_time(bye_requests_total{namespace=\"$namespace\"} [1h]))",
+          "expr": "sum(students_create_total{namespace=\"$namespace\"}) - sum(min_over_time(students_create_total{namespace=\"$namespace\"} [1h]))",
           "format": "time_series",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
-      "title": "CALLS TO /BYE LAST HOUR",
+      "title": "CALLS TO /API/STUDENT LAST HOUR",
       "type": "stat"
     },
     {
@@ -334,6 +334,69 @@
       "type": "stat"
     },
     {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 80
+              },
+              {
+                "color": "red",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 20,
+        "y": 0
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "value"
+      },
+      "pluginVersion": "8.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "exemplar": true,
+          "expr": "sum(frequencies_requests_total{namespace=\"$namespace\"}) - sum(min_over_time(frequencies_requests_total{namespace=\"$namespace\"} [1h]))",
+          "format": "time_series",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "CALLS TO /ANALYZE-TEXT-FILE LAST HOUR",
+      "type": "stat"
+    },
+    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
@@ -343,8 +406,93 @@
       "fillGradient": 0,
       "gridPos": {
         "h": 9,
-        "w": 24,
+        "w": 12,
         "x": 0,
+        "y": 5
+      },
+      "hiddenSeries": false,
+      "id": 2,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "8.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "exemplar": true,
+          "expr": "students_update_total{namespace=\"$namespace\"} - min_over_time(students_update_total{namespace=\"$namespace\"} [1h])",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "NUMBER OF CALLS TO /UPDATESTUDENTS ENDPOINT IN THE LAST HOUR",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:1254",
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:1255",
+          "format": "short",
+          "logBase": 1,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "description": "",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
         "y": 5
       },
       "hiddenSeries": false,

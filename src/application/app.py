@@ -190,7 +190,7 @@ class StudentsServer:
         )
 
         app.add_api_route(
-            "/students/{student_id}/{field_name}/{field_value}",
+            "/updatestudents/{student_id}/{field_name}/{field_value}",
             endpoint=self.update_student,
             methods=["PUT"],
             response_model=StudentModel,
